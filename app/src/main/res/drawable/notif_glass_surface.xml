@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Full-bleed liquid glass for the traffic notification.
+
+  The notification itself is painted with notif_surface by the system (setColor + setColorized),
+  so this drawable only adds the glass light on top of it: a teal -> indigo-slate -> blue / violet
+  mesh of soft glows. It has no body, no rim and no corners of its own; the system container
+  supplies the rounded outline, and the inner chips / tiles / pills keep their own rims. The
+  translucent chips / tiles let this colour show through, which is what makes them read as glass
+  instead of grey patches on a flat navy.
+
+  Layout of the mesh (fractions of the content area, x / y of the centre -> radius):
+    teal wash       0.36 / 0.50 -> 50%   big, centre-left
+    slate wash      0.64 / 0.50 -> 50%   big, centre-right; overlaps the teal one so they blend
+    teal accent     0.22 / 0.30 -> 30%   upper left
+    slate accent    0.76 / 0.30 -> 30%   upper right
+    violet          0.26 / 0.70 -> 30%   lower left
+    blue            0.72 / 0.70 -> 30%   lower right
+
+  The glow radius is a fraction of the SHORTER side and each centre sits at least one radius away
+  from every edge it could reach (50% at the vertical middle, 30% at 0.30 / 0.70), so the light has
+  faded to (almost) nothing before it meets the edge of the view. A glow that is still bright at the
+  edge shows up as a hard rectangle on the notification surface, which is exactly what this drawable
+  must not do. Keep that rule when moving a glow. The same drawable is used for the 38dp collapsed
+  row and the taller expanded view, hence the fractions instead of dp.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!-- Teal wash, centre-left -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.36"
+        android:centerY="0.50"
+        android:endColor="@color/notif_surface_glow_teal_end"
+        android:gradientRadius="50%"
+        android:startColor="@color/notif_surface_glow_teal"
+        android:type="radial" />
+    </shape>
+  </item>
+
+  <!-- Indigo-slate wash, centre-right -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.64"
+        android:centerY="0.50"
+        android:endColor="@color/notif_surface_glow_slate_end"
+        android:gradientRadius="50%"
+        android:startColor="@color/notif_surface_glow_slate"
+        android:type="radial" />
+    </shape>
+  </item>
+
+  <!-- Teal accent, upper left -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.22"
+        android:centerY="0.30"
+        android:endColor="@color/notif_surface_glow_teal_end"
+        android:gradientRadius="30%"
+        android:startColor="@color/notif_surface_glow_teal"
+        android:type="radial" />
+    </shape>
+  </item>
+
+  <!-- Slate accent, upper right -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.76"
+        android:centerY="0.30"
+        android:endColor="@color/notif_surface_glow_slate_end"
+        android:gradientRadius="30%"
+        android:startColor="@color/notif_surface_glow_slate"
+        android:type="radial" />
+    </shape>
+  </item>
+
+  <!-- Violet, lower left (picks up the purple of the app icon) -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.26"
+        android:centerY="0.70"
+        android:endColor="@color/notif_surface_glow_violet_end"
+        android:gradientRadius="30%"
+        android:startColor="@color/notif_surface_glow_violet"
+        android:type="radial" />
+    </shape>
+  </item>
+
+  <!-- Blue, lower right -->
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+        android:centerX="0.72"
+        android:centerY="0.70"
+        android:endColor="@color/notif_surface_glow_blue_end"
+        android:gradientRadius="30%"
+        android:startColor="@color/notif_surface_glow_blue"
+        android:type="radial" />
+    </shape>
+  </item>
+</layer-list>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Frosted inner tile holding one speed (expanded view). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Tinted glass with a hairline rim -->
+  <item>
+    <shape android:shape="rectangle">
+      <corners android:radius="18dp" />
+      <gradient
+        android:angle="270"
+        android:endColor="@color/notif_tile_bottom"
+        android:startColor="@color/notif_tile_top"
+        android:type="linear" />
+      <stroke
+        android:width="0.75dp"
+        android:color="@color/notif_tile_stroke" />
+    </shape>
+  </item>
+  <!-- Top sheen -->
+  <item
+    android:bottom="1dp"
+    android:left="1dp"
+    android:right="1dp"
+    android:top="1dp">
+    <shape android:shape="rectangle">
+      <corners android:radius="18dp" />
+      <gradient
+        android:angle="270"
+        android:endColor="@color/notif_sheen_end"
+        android:startColor="@color/notif_sheen_top"
+        android:type="linear" />
+    </shape>
+  </item>
+</layer-list>

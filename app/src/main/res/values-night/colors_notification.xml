@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!--
+    NIGHT variant of the traffic notification glass: deep navy glass (same family as the in-app
+    GlassDark* fills) with white text. Same names as values/colors_notification.xml.
+  -->
+
+  <color name="notif_accent">#FF2DD4BF</color>
+
+  <!--
+    Whole-notification surface (setColor + setColorized). Deep teal-navy instead of the old flat
+    navy (#121B2F): it is the colour of the icon column and header, which the system paints and
+    no glow can reach, so it has to carry some hue on its own. The glows below are laid on top of it
+    and all fade to alpha 0 before the edge of the content area, so they blend into this colour
+    without a seam.
+  -->
+  <color name="notif_surface">#FF14253A</color>
+
+  <!--
+    Full-bleed surface glows: a teal -> indigo-slate -> blue / violet mesh, after the liquid glass
+    reference (teal top-left, slate top-right, deeper blue below). Each glow fades to its own
+    colour at alpha 0, otherwise it greys out half way. They are strong enough to show through the
+    translucent chips / tiles, which is what makes the glass read as glass.
+  -->
+  <color name="notif_surface_glow_teal">#6657C2CF</color>
+  <color name="notif_surface_glow_teal_end">#0057C2CF</color>
+  <color name="notif_surface_glow_slate">#5C8E9CE0</color>
+  <color name="notif_surface_glow_slate_end">#008E9CE0</color>
+  <color name="notif_surface_glow_blue">#594F86E6</color>
+  <color name="notif_surface_glow_blue_end">#004F86E6</color>
+  <color name="notif_surface_glow_violet">#407C5CE0</color>
+  <color name="notif_surface_glow_violet_end">#007C5CE0</color>
+
+  <!-- Card body -->
+  <color name="notif_glass_body_top">#FF1C2842</color>
+  <color name="notif_glass_body_bottom">#FF0A101D</color>
+
+  <!-- Specular rim -->
+  <color name="notif_glass_rim_start">#D9FFFFFF</color>
+  <color name="notif_glass_rim_center">#33FFFFFF</color>
+  <color name="notif_glass_rim_end">#73FFFFFF</color>
+  <color name="notif_glass_inner_highlight">#2EFFFFFF</color>
+
+  <!-- Ambient glow and top shine -->
+  <color name="notif_glass_glow_teal">#4D2DD4BF</color>
+  <color name="notif_glass_glow_teal_end">#002DD4BF</color>
+  <color name="notif_glass_glow_blue">#4060A5FA</color>
+  <color name="notif_glass_glow_blue_end">#0060A5FA</color>
+  <color name="notif_glass_shine_top">#38FFFFFF</color>
+  <color name="notif_glass_shine_mid">#0AFFFFFF</color>
+  <color name="notif_glass_shine_end">#00FFFFFF</color>
+
+  <!-- Text on glass -->
+  <color name="notif_text_primary">#FFFFFFFF</color>
+  <color name="notif_text_secondary">#CCFFFFFF</color>
+  <color name="notif_text_tertiary">#99FFFFFF</color>
+
+  <!-- Upload (blue, = LogBlue in the app) -->
+  <color name="notif_up">#FF7DB8FF</color>
+  <color name="notif_up_top">#4D60A5FA</color>
+  <color name="notif_up_bottom">#2460A5FA</color>
+  <color name="notif_up_stroke">#6660A5FA</color>
+
+  <!-- Download (green, = ServiceRunning in the app) -->
+  <color name="notif_down">#FF4ADE80</color>
+  <color name="notif_down_top">#4D4ADE80</color>
+  <color name="notif_down_bottom">#244ADE80</color>
+  <color name="notif_down_stroke">#664ADE80</color>
+
+  <!-- Inner tile (expanded view) -->
+  <color name="notif_tile_top">#3DFFFFFF</color>
+  <color name="notif_tile_bottom">#17FFFFFF</color>
+  <color name="notif_tile_stroke">#40FFFFFF</color>
+
+  <!-- Sheen -->
+  <color name="notif_sheen_top">#33FFFFFF</color>
+  <color name="notif_sheen_end">#00FFFFFF</color>
+
+  <!-- Stop button (brand pink glass) -->
+  <color name="notif_stop_top">#B3F06292</color>
+  <color name="notif_stop_bottom">#80E91E63</color>
+  <color name="notif_stop_stroke">#8CFFFFFF</color>
+  <color name="notif_stop_text">#FFFFFFFF</color>
+
+  <!-- Status dot -->
+  <color name="notif_dot_running">#FF4ADE80</color>
+  <color name="notif_dot_running_halo">#404ADE80</color>
+  <color name="notif_dot_starting">#FFFBBF24</color>
+  <color name="notif_dot_starting_halo">#40FBBF24</color>
+  <color name="notif_dot_stalled">#FFF87171</color>
+  <color name="notif_dot_stalled_halo">#40F87171</color>
+
+  <color name="notif_health_good">#FF4ADE80</color>
+  <color name="notif_health_wait">#FFFBBF24</color>
+  <color name="notif_health_warn">#FFFBBF24</color>
+  <color name="notif_health_bad">#FFF87171</color>
+  <color name="notif_health_pill_top">#2EFFFFFF</color>
+  <color name="notif_health_pill_bottom">#10FFFFFF</color>
+  <color name="notif_health_pill_stroke">#33FFFFFF</color>
+</resources>

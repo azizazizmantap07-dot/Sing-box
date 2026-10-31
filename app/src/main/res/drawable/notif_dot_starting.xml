@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status dot while the service is starting / reconnecting: amber core with a soft halo (14dp view). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item>
+    <shape android:shape="oval">
+      <solid android:color="@color/notif_dot_starting_halo" />
+    </shape>
+  </item>
+  <item
+    android:bottom="3dp"
+    android:left="3dp"
+    android:right="3dp"
+    android:top="3dp">
+    <shape android:shape="oval">
+      <solid android:color="@color/notif_dot_starting" />
+    </shape>
+  </item>
+</layer-list>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Collapsed liquid glass traffic notification (RemoteViews, used with DecoratedCustomViewStyle).
+
+  The notification surface itself is painted by the system (setColor + setColorized), and this
+  layout only lays the glass light (notif_glass_surface) and the chips over it, so there is no
+  inset card any more. Only classes that RemoteViews may inflate are used here (FrameLayout,
+  LinearLayout, ImageView, TextView): no plain View, no Space.
+
+  Sizing: the chips are 32dp inside a 38dp row (3dp above and below) and the row sits in 3dp of
+  outer padding, 44dp in total. The old layout was exactly 48dp with zero slack (3 + 5 + 32 + 5 + 3),
+  so when the system handed the content area a pixel or two less than 48dp the row was squeezed
+  and the bottom hairline (and the bottom of the curve) of the chips was cut off. The slack
+  absorbs that, and clipChildren / clipToPadding are off so a chip is never trimmed by the
+  padding box of its own row.
+
+  Two states, toggled from ServiceNotification:
+    - no traffic yet (starting / reconnecting / live speed switched off): dot + status text
+    - traffic available: dot + [up chip] [down chip]
+
+  Dot + status + chevron is one touch target (notification_details_toggle) that reveals the detail
+  card (notification_traffic_expanded). It is the app's own control: some ROMs open every
+  notification expanded no matter what the channel says, so the notification starts as this pill
+  and only gets its big layout once this is tapped. The chevron flips while the details are shown.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:clipChildren="false"
+  android:clipToPadding="false"
+  android:paddingTop="3dp"
+  android:paddingBottom="3dp"
+  tools:viewBindingIgnore="true">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/notif_glass_surface"
+    android:baselineAligned="false"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:gravity="center_vertical"
+    android:minHeight="38dp"
+    android:orientation="horizontal"
+    android:paddingStart="2dp"
+    android:paddingTop="3dp"
+    android:paddingEnd="0dp"
+    android:paddingBottom="3dp">
+
+    <!-- Touch target: status dot + state text + chevron. Taps show / hide the details. -->
+    <LinearLayout
+      android:id="@+id/notification_details_toggle"
+      android:layout_width="wrap_content"
+      android:layout_height="32dp"
+      android:layout_marginEnd="4dp"
+      android:baselineAligned="false"
+      android:contentDescription="@string/notif_details_show"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+
+      <FrameLayout
+        android:id="@+id/notification_dot"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginEnd="9dp"
+        android:background="@drawable/notif_dot_running"
+        android:importantForAccessibility="no" />
+
+      <!-- State: no traffic yet (also shown next to the chips: the short health word) -->
+      <TextView
+        android:id="@+id/notification_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textColor="@color/notif_health_good"
+        android:textSize="12sp" />
+
+      <ImageView
+        android:id="@+id/notification_details_chevron"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="4dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_notif_chevron_down" />
+    </LinearLayout>
+
+    <!-- State: traffic available -->
+    <LinearLayout
+      android:id="@+id/notification_traffic_group"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:baselineAligned="false"
+      android:clipChildren="false"
+      android:clipToPadding="false"
+      android:gravity="center_vertical"
+      android:orientation="horizontal"
+      android:visibility="gone">
+
+      <!-- Upload chip -->
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
+        android:layout_weight="1"
+        android:background="@drawable/notif_chip_up"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageView
+          android:layout_width="13dp"
+          android:layout_height="13dp"
+          android:importantForAccessibility="no"
+          android:src="@drawable/ic_notif_arrow_up" />
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="4dp"
+          android:orientation="horizontal">
+
+          <TextView
+            android:id="@+id/notification_up_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="13sp" />
+
+          <TextView
+            android:id="@+id/notification_up_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="10sp" />
+        </LinearLayout>
+      </LinearLayout>
+
+      <!-- Download chip -->
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_weight="1"
+        android:background="@drawable/notif_chip_down"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageView
+          android:layout_width="13dp"
+          android:layout_height="13dp"
+          android:importantForAccessibility="no"
+          android:src="@drawable/ic_notif_arrow_down" />
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="4dp"
+          android:orientation="horizontal">
+
+          <TextView
+            android:id="@+id/notification_down_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="13sp" />
+
+          <TextView
+            android:id="@+id/notification_down_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="10sp" />
+        </LinearLayout>
+      </LinearLayout>
+    </LinearLayout>
+  </LinearLayout>
+</FrameLayout>

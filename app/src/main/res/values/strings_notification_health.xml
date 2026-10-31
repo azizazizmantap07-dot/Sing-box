@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="notif_health_caption">Link</string>
+  <string name="notif_health_connecting">Connecting</string>
+  <string name="notif_health_connecting_short">Connecting</string>
+  <string name="notif_health_healthy">Connection healthy</string>
+  <string name="notif_health_healthy_short">Healthy</string>
+  <string name="notif_health_stalled">Connection stalled</string>
+  <string name="notif_health_stalled_short">Stalled</string>
+  <string name="notif_health_airplane">Airplane recovery started</string>
+  <string name="notif_health_airplane_short">Recovery</string>
+  <string name="notif_health_restart">Auto restart started</string>
+  <string name="notif_health_restart_short">Restarting</string>
+  <string name="notif_health_restored">Connection restored</string>
+  <string name="notif_health_restored_short">Restored</string>
+  <string name="notif_details_show">Show details</string>
+  <string name="notif_details_hide">Hide details</string>
+</resources>

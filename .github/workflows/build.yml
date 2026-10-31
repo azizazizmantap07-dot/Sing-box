@@ -1,0 +1,69 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set Android SDK path
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+
+      - name: Accept licenses & install SDK packages + NDK
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          SM=$(find "$SDK/cmdline-tools" -name sdkmanager 2>/dev/null | head -1)
+          yes 2>/dev/null | "$SM" --licenses >/dev/null || true
+          "$SM" --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;28.0.13004108" || \
+          "$SM" --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;28.0.13004108" || \
+          "$SM" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;27.3.13750724"
+          if [ -d "$SDK/ndk/28.0.13004108" ]; then
+            echo "ANDROID_NDK_HOME=$SDK/ndk/28.0.13004108" >> "$GITHUB_ENV"
+          elif [ -d "$SDK/ndk/27.3.13750724" ]; then
+            echo "ANDROID_NDK_HOME=$SDK/ndk/27.3.13750724" >> "$GITHUB_ENV"
+          fi
+
+      - name: Download libbox.aar (1.14.3)
+        run: |
+          set -euo pipefail
+          mkdir -p app/libs
+          URL="https://github.com/singbox-android/libbox/releases/download/1.14.3/libbox.aar"
+          echo "Downloading $URL"
+          curl -fL --retry 3 -o app/libs/libbox.aar "$URL"
+          ls -lh app/libs/libbox.aar
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # summary keeps the log readable; stacktrace still printed on real failures
+      - name: Build otherRelease APK (signed, arm64 only)
+        run: ./gradlew assembleOtherRelease --stacktrace --warning-mode=summary
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: SFA-APK
+          path: app/build/outputs/apk/other/release/*.apk
+          if-no-files-found: error

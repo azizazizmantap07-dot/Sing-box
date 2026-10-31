@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Expanded liquid glass traffic notification (RemoteViews, used with DecoratedCustomViewStyle).
+
+  The notification surface itself is painted by the system (setColor + setColorized); this layout
+  adds the glass light (notif_glass_surface) over it and lines its content up with the system
+  header, so the whole notification is one glass panel instead of a card inside a grey one.
+
+  System header : app name only (the profile is not passed to setSubText, so the system does not
+                  draw its plain "•" text bullet).
+  Status row    : glass card (notif_glass_card) with status dot, status text and uptime
+                  (Chronometer as MM:SS under an hour, a TextView as H:MM from then on, so the
+                  card never has to fit seconds next to hours), the round chevron (notification_details_hide_inline) that folds
+                  the notification back to the compact pill, then the Stop pill. The inline
+                  chevron is only shown while the watchdog is off, so the tiles follow the status
+                  row directly instead of being pushed down by a row that holds just a chevron.
+  Health card   : "Link" caption + connection health, same glass card, and the round chevron that
+                  folds the notification back to the compact pill. Only shown while the watchdog
+                  is on (it carries the chevron then, and the inline one above is hidden).
+  Tiles row     : one frosted tile each for upload and download (round orb + arrow, big speed,
+                  total transferred). Hidden until the first traffic sample arrives.
+
+  Only classes that RemoteViews may inflate are used here (FrameLayout, LinearLayout, ImageView,
+  TextView, Chronometer): no plain View, no Space.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:paddingTop="4dp"
+  android:paddingBottom="4dp"
+  tools:viewBindingIgnore="true">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/notif_glass_surface"
+    android:orientation="vertical"
+    android:paddingStart="2dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="0dp"
+    android:paddingBottom="6dp">
+
+    <!-- Status row: glass card (dot, status, uptime) + [chevron, watchdog off only] + Stop pill -->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:baselineAligned="false"
+      android:gravity="center_vertical"
+      android:orientation="horizontal">
+
+      <LinearLayout
+        android:id="@+id/notification_status_card"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/notif_glass_card"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="12dp">
+
+        <FrameLayout
+          android:id="@+id/notification_dot"
+          android:layout_width="14dp"
+          android:layout_height="14dp"
+          android:layout_marginEnd="9dp"
+          android:background="@drawable/notif_dot_running"
+          android:importantForAccessibility="no" />
+
+        <TextView
+          android:id="@+id/notification_status_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ellipsize="end"
+          android:fontFamily="sans-serif-medium"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:textColor="@color/notif_text_primary"
+          android:textSize="14sp" />
+
+        <TextView
+          android:id="@+id/notification_uptime_separator"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="6dp"
+          android:includeFontPadding="false"
+          android:text="·"
+          android:textColor="@color/notif_text_tertiary"
+          android:textSize="14sp"
+          android:visibility="gone"
+          tools:ignore="HardcodedText" />
+
+        <!-- Uptime under one hour: MM:SS, ticked by the system -->
+        <Chronometer
+          android:id="@+id/notification_uptime"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="6dp"
+          android:fontFeatureSettings="tnum"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:textColor="@color/notif_text_secondary"
+          android:textSize="13sp"
+          android:visibility="gone" />
+
+        <!--
+          Uptime from one hour on: H:MM, without seconds. A Chronometer cannot drop the seconds,
+          so this plain TextView takes over (ServiceNotification redraws it every minute). It is
+          never wider than MM:SS, so the status card keeps its shape.
+        -->
+        <TextView
+          android:id="@+id/notification_uptime_hours"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="6dp"
+          android:fontFeatureSettings="tnum"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:textColor="@color/notif_text_secondary"
+          android:textSize="13sp"
+          android:visibility="gone" />
+      </LinearLayout>
+
+      <!--
+        Hide details (watchdog off): back to the compact pill, right beside the status card.
+        The 28 x 32dp touch target is as tall as the row. The 22dp circle sits at its start, so it
+        is 8dp from the status card (that card's own end margin, the same gap it has to the Stop
+        pill when this button is hidden) and 6dp from the Stop pill. This costs the status card
+        28dp of width, so keep it narrow.
+        Hidden by default; ServiceNotification shows it while the watchdog is off.
+      -->
+      <FrameLayout
+        android:id="@+id/notification_details_hide_inline"
+        android:layout_width="28dp"
+        android:layout_height="32dp"
+        android:contentDescription="@string/notif_details_hide"
+        android:visibility="gone">
+
+        <FrameLayout
+          android:layout_width="22dp"
+          android:layout_height="22dp"
+          android:layout_gravity="start|center_vertical"
+          android:background="@drawable/notif_btn_toggle"
+          android:importantForAccessibility="no">
+
+          <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_notif_chevron_up" />
+        </FrameLayout>
+      </FrameLayout>
+
+      <!-- Stop pill -->
+      <LinearLayout
+        android:id="@+id/notification_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:background="@drawable/notif_btn_stop"
+        android:baselineAligned="false"
+        android:contentDescription="@string/stop"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="14dp">
+
+        <ImageView
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:importantForAccessibility="no"
+          android:src="@drawable/ic_notif_stop" />
+
+        <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="5dp"
+          android:fontFamily="sans-serif-medium"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:text="@string/stop"
+          android:textColor="@color/notif_stop_text"
+          android:textSize="13sp" />
+      </LinearLayout>
+    </LinearLayout>
+
+    <!-- Connection health. Text and dot colour are set from ServiceNotification. -->
+    <LinearLayout
+      android:id="@+id/notification_health"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:background="@drawable/notif_glass_card"
+      android:baselineAligned="false"
+      android:gravity="center_vertical"
+      android:minHeight="32dp"
+      android:orientation="horizontal"
+      android:paddingStart="10dp"
+      android:paddingTop="6dp"
+      android:paddingEnd="12dp"
+      android:paddingBottom="6dp">
+
+      <FrameLayout
+        android:id="@+id/notification_health_dot"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/notif_dot_running"
+        android:importantForAccessibility="no" />
+
+      <TextView
+        android:id="@+id/notification_health_caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:text="@string/notif_health_caption"
+        android:textColor="@color/notif_text_tertiary"
+        android:textSize="11sp" />
+
+      <TextView
+        android:id="@+id/notification_health_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:textColor="@color/notif_health_good"
+        android:textSize="13sp" />
+
+      <!-- Hide details: back to the compact pill -->
+      <FrameLayout
+        android:id="@+id/notification_details_hide"
+        android:layout_width="36dp"
+        android:layout_height="22dp"
+        android:contentDescription="@string/notif_details_hide">
+
+        <FrameLayout
+          android:layout_width="22dp"
+          android:layout_height="22dp"
+          android:layout_gravity="center"
+          android:background="@drawable/notif_btn_toggle"
+          android:importantForAccessibility="no">
+
+          <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_notif_chevron_up" />
+        </FrameLayout>
+      </FrameLayout>
+    </LinearLayout>
+
+    <!-- Tiles row -->
+    <LinearLayout
+      android:id="@+id/notification_tiles"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:baselineAligned="false"
+      android:orientation="horizontal"
+      android:visibility="gone">
+
+      <!-- Upload tile -->
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/notif_tile"
+        android:orientation="vertical"
+        android:paddingStart="10dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="9dp">
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:baselineAligned="false"
+          android:gravity="center_vertical"
+          android:orientation="horizontal">
+
+          <FrameLayout
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:background="@drawable/notif_orb_up"
+            android:importantForAccessibility="no">
+
+            <ImageView
+              android:layout_width="12dp"
+              android:layout_height="12dp"
+              android:layout_gravity="center"
+              android:importantForAccessibility="no"
+              android:src="@drawable/ic_notif_arrow_up" />
+          </FrameLayout>
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/upload"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="7dp"
+          android:orientation="horizontal">
+
+          <TextView
+            android:id="@+id/notification_up_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="21sp" />
+
+          <TextView
+            android:id="@+id/notification_up_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="11sp" />
+        </LinearLayout>
+
+        <TextView
+          android:id="@+id/notification_up_total"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="3dp"
+          android:fontFeatureSettings="tnum"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:textColor="@color/notif_text_tertiary"
+          android:textSize="11sp" />
+      </LinearLayout>
+
+      <!-- Download tile -->
+      <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@drawable/notif_tile"
+        android:orientation="vertical"
+        android:paddingStart="10dp"
+        android:paddingTop="9dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="9dp">
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:baselineAligned="false"
+          android:gravity="center_vertical"
+          android:orientation="horizontal">
+
+          <FrameLayout
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:background="@drawable/notif_orb_down"
+            android:importantForAccessibility="no">
+
+            <ImageView
+              android:layout_width="12dp"
+              android:layout_height="12dp"
+              android:layout_gravity="center"
+              android:importantForAccessibility="no"
+              android:src="@drawable/ic_notif_arrow_down" />
+          </FrameLayout>
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/download"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="7dp"
+          android:orientation="horizontal">
+
+          <TextView
+            android:id="@+id/notification_down_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="21sp" />
+
+          <TextView
+            android:id="@+id/notification_down_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/notif_text_secondary"
+            android:textSize="11sp" />
+        </LinearLayout>
+
+        <TextView
+          android:id="@+id/notification_down_total"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="3dp"
+          android:fontFeatureSettings="tnum"
+          android:includeFontPadding="false"
+          android:maxLines="1"
+          android:textColor="@color/notif_text_tertiary"
+          android:textSize="11sp" />
+      </LinearLayout>
+    </LinearLayout>
+  </LinearLayout>
+</FrameLayout>

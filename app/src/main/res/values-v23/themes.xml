@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base.V23" />
+
+    <style name="AppTheme.Base.V23" parent="AppTheme.Base">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">?attr/colorSurfaceContainer</item>
+    </style>
+
+
+    <style name="AppTheme.Starting" parent="AppTheme.Starting.V23" />
+
+    <style name="AppTheme.Starting.V23" parent="AppTheme.Starting.Base">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+</resources>

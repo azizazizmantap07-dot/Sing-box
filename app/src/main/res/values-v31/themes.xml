@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.Starting" parent="AppTheme.Starting.V31" />
+
+    <!-- Android 12+ system splash: same colour as the launch animation and no icon of its own. -->
+    <style name="AppTheme.Starting.V31" parent="AppTheme.Starting.V27">
+        <item name="android:windowSplashScreenBackground">@color/launch_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/launch_icon_empty</item>
+    </style>
+
+</resources>
